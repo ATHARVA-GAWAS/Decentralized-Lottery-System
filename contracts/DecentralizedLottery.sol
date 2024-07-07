@@ -1,33 +1,44 @@
-// contracts/DecentralizedLottery.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 contract DecentralizedLottery {
-    address public owner;
+    address public manager;
     address[] public players;
-    uint256 public ticketPrice;
+    address public recentWinner;
     uint256 public randomResult;
 
-    constructor(uint256 _ticketPrice) {
-        owner = msg.sender;
-        ticketPrice = _ticketPrice;
+    constructor() {
+        manager = msg.sender;
     }
 
     function buyTicket() public payable {
-        require(msg.value == ticketPrice, "Incorrect ticket price");
+        require(msg.value == 0.1 ether, "Ticket costs 0.1 ether");
         players.push(msg.sender);
     }
 
-    function drawWinner() public onlyOwner {
-        require(players.length > 0, "No players in the lottery");
-        randomResult = uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, players.length))) % players.length;
-        address winner = players[randomResult];
-        payable(winner).transfer(address(this).balance);
-        players = new address ; // Reset the players array
+    function getPlayers() public view returns (address[] memory) {
+        return players;
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Not the owner");
+    function drawWinner() public restricted {
+        require(players.length > 0, "No players in the lottery");
+        
+        uint256 index = random() % players.length;
+        recentWinner = players[index];
+
+        // Transfer the balance to the winner
+        payable(recentWinner).transfer(address(this).balance);
+
+        // Reset the players array
+        delete players;
+    }
+
+    function random() private view returns (uint256) {
+        return uint256(keccak256(abi.encodePacked(block.timestamp, block.prevrandao, players.length)));
+    }
+
+    modifier restricted() {
+        require(msg.sender == manager, "Only the manager can call this function");
         _;
     }
 }

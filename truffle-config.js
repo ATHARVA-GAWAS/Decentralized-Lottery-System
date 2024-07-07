@@ -5,33 +5,27 @@ const { MNEMONIC, PROJECT_ID } = process.env;
 
 module.exports = {
   networks: {
-    development: {
-      host: "127.0.0.1",
-      port: 8545,
-      network_id: "*",
+    goerli: {
+      provider: () => new HDWalletProvider(MNEMONIC, `https://goerli.infura.io/v3/${PROJECT_ID}`),
+      network_id: 5,       // Goerli's id
+      confirmations: 2,    // # of confirmations to wait between deployments. (default: 0)
+      timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
+      skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
     },
-    rinkeby: {
-      provider: () => new HDWalletProvider(MNEMONIC, `https://rinkeby.infura.io/v3/${PROJECT_ID}`),
-      network_id: 4,
-      gas: 4500000,
-      gasPrice: 10000000000,
-      confirmations: 2,
-      timeoutBlocks: 200,
-      skipDryRun: true,
-    },
+    linea_goerli: {
+      provider: () => new HDWalletProvider(MNEMONIC, `https://linea-goerli.infura.io/v3/${PROJECT_ID}`),
+      network_id: 59140,    // Linea Goerli's id
+      confirmations: 2,     // # of confirmations to wait between deployments. (default: 0)
+      timeoutBlocks: 200,   // # of blocks before a deployment times out  (minimum/default: 50)
+      skipDryRun: true      // Skip dry run before migrations? (default: false for public nets )
+    }
   },
-
   mocha: {
-    timeout: 100000
+    // timeout: 100000
   },
-
   compilers: {
     solc: {
-      version: "0.8.21",
-      optimizer: {
-        enabled: true,
-        runs: 200
-      }
+      version: "0.8.21"
     }
   }
 };
